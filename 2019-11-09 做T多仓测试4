@@ -1,0 +1,81 @@
+import time
+k = -0.05
+new_amount = 0
+new_amount1 = 0
+new_profit = 0
+contract = "quarter"
+
+def volum():
+    positionvolum = exchange.GetPosition()
+    iniamount = positionvolum[0].Amount
+    return iniamount
+
+def initial():
+	iniposition = exchange.GetPosition()
+	iniprice = iniposition[0].Price
+	profitrate = iniposition[0].Info.profit_rate
+	return profitrate
+
+def depth(iniamount):
+    exchange.SetContractType(contract)
+    inidepth = exchange.GetDepth()
+    iniask = inidepth.Asks[0].Price		# 卖二价
+    inibid = inidepth.Bids[0].Price		# 买二价
+    buyprice = round(iniask * (1-0.03 / 20), 2)
+    sellprice = round(inibid * (1+0.03 / 20), 2)
+    tradeamount = round(iniamount * 0.05)
+    return iniask, inibid, buyprice, sellprice, tradeamount
+
+def buytrade(buyprice, tradeamount):
+	exchange.SetContractType(contract)
+	exchange.SetMarginLevel(20)
+	exchange.SetDirection("buy")
+	exchange.Buy(buyprice, tradeamount)
+
+
+def closebuy(iniask, tradeamount):
+	exchange.SetContractType(contract)
+	exchange.SetMarginLevel(20)
+	exchange.SetDirection("closebuy")
+	exchange.Sell(iniask, tradeamount)
+
+def closesell(inibid, tradeamount):
+	exchange.SetContractType(contract)
+	exchange.SetMarginLevel(20)
+	exchange.SetDirection("closesell")
+	exchange.Sell(inibid, tradeamount)
+
+def selltrade(sellprice, tradeamount):
+	exchange.SetContractType(contract)
+	exchange.SetMarginLevel(20)
+	exchange.SetDirection("sell")
+	exchange.Sell(sellprice, tradeamount)
+
+def update_position():
+    new_position = exchange.GetPosition()
+    new_amount = new_position[0].Amount
+    new_amount1 = new_position[0].Amount
+    return new_amount, new_amount1
+
+def main():
+    Log('策略运行成功，', '开始监控')
+    while 1:
+        iniamount = volum()
+        profitrate = initial()
+        if profitrate < k:
+            Log('亏损率大于5%', '初始仓位：'+ str(iniamount), '开始交易')
+            iniask, inibid, buyprice, sellprice, tradeamount = depth(iniamount)
+            closebuy(iniask, tradeamount)
+            time.sleep(1)
+            new_amount, new_amount1 = update_position()
+            while new_amount == iniamount:			# new_amount与iniamount是否相等
+                time.sleep(1)											# 相等，执行休眠
+            Log('平仓已成交')
+            buytrade(buyprice, tradeamount)							# 执行buytrade
+            Log('开仓已挂单')
+            new_amount, new_amount1 = update_position()
+            while new_amount1 != iniamount:		# new_amount1与iniamount是否相等
+                time.sleep(1)											# 不相等，执行休眠
+            Log('挂单已成交，卖出价：'+ str(iniask), '买入价：'+ str(buyprice), '成交量：'+ str(tradeamount), '当前持仓量：@'+ str(new_amount1))	# 输出'成功'
+        else:															# 当profitrate > -10%
+            time.sleep(2)
