@@ -75,6 +75,7 @@ def main():
             Log('开仓已挂单')
             new_amount, new_amount1 = update_position()
             while new_amount1 != iniamount:			# new_amount1与iniamount是否相等
+	    	new_amount, new_amount1 = update_position()
                 time.sleep(1)					# 不相等，执行休眠
             Log('挂单已成交，卖出价：'+ str(iniask), '买入价：'+ str(buyprice), '成交量：'+ str(tradeamount), '当前持仓量：@'+ str(new_amount1))	# 输出'成功'
         else:															# 当profitrate > -10%
