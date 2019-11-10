@@ -1,0 +1,89 @@
+# Update!!!
+2019-11-07
+	- This is the first day that the Rolling Position Bot real trading. In this moment, we finished the core trade design: 2019-11-07 做T多仓.
+	- In this part, we want to do a circulation, which will be triggered while profit rate < -10%, BTC Contract, HuobiDM.
+	- Now, I will upload the whole trading strategy:
+
+1.	Open Position Due to the Indicators
+  Use MA, RSI, MACD, MFI and others indicator to judge the open position(price), set the trading target, put the order (1).
+    a). In the longer period judgement, use 10% of balance to set up the position. Maximum amount less than 30% of balance.
+    b). If in short period judgement, the real price goes in the opposite direction (Profit rate > N or price increased 150-200 ppi, depends on the Long Period Judgement), raise the position 5%.
+2.  Close Total Position Due to Indicators
+  Use the indicators to judge the holding position, if the indicator shows the market direction changed, Close Position (2).
+	  a). Stop Lose\ Stop Profit
+3. T-Trading Strategy
+  Use the 做T strategy, will start doing the rolling Open Price when profit rate < 10%. The trading in each time will hold 5% of total hold position amount. (3)
+	  a). Once the profit rate < -10%, 5% of total position will be Closed.
+	  b). Check new_amount, if new_amount != initial amount(Close Position succeeded).
+	  c). Open new position, the amount will same as the amount in Close Position. The price equation: Closed Price * (1+\- r/m). (4)
+4. Rolling Stop Profit
+	  a). Once the profit rate > 30%, 20% of total holding position will be Closed. 
+	  b). In each 10% increased above 30%, 20 of total holding position will be Closed, until position = 0.
+	  c). If in this situation that after Close 20% of total holding position and the left position amount less than initial amount while the profit rate < 0%, make supplement in same price as the Open Price until the holding position amount = initial amount.
+
+
+Annotation:
+  (1). Use the Algorithm to indicate the Open Position
+  (2). This operation is for close position while the Black Swan.
+  (3). T-Trading Theory: After the trading strategy judged future market trend, to make the trading before the market.
+  (4). The Closed Price will suit for Long and Short operation both. In Buy order: P * (1-r/m); In Sell order: P * (1+r/m).
+        (r = Satisfy percentage of the price gap； m = Margin Level)
+        
+中文：
+    中长趋势判断函数及初始仓位设置
+      1.	根据MA、RSI、MACD、MFI等指标进行判断中长期趋势，首次开仓保证金10%。最大持仓比例不超过保证金30%。
+      2.	如达到策略止盈目标，全部平仓
+    做T函数
+      1.	做T函数是基于股票做T策略进行修改而来，其理论原理是在短期趋势判断正确的情况下，如亏损超过10%（Profit Rate < -10%），则按持仓5%数量，当前价格，平仓。
+      2.	在平仓操作后再次获取持仓数，如新持仓数不等于初始持仓数，则判断为交易成功，进行开仓操作，挂单数等于平仓数。
+      3.	挂单价计算公式：平仓成交价X（1 +/- r/m），加减取决于持仓方向。
+      4.	再次获取持仓数，如最新持仓数等于初始持仓数，则判断为交易成功。
+    滚动止盈（补仓）
+      1.	当盈利率超过30%，平仓总持仓数20%；
+      2.	当盈利率超过30%，每当收益率继续增加10%，则再次平仓总持仓数20%（最大盈利率80%，最大平仓数5次）
+      3.	当前持仓数小于初始持仓数，且收益率小于0%时，按开仓均价补仓，补仓操作后持仓数必须等于初始仓位。
+
+
+# Update!!!
+2019-11-09
+  After tons of problems of the original code, I recognized one seriously BUG, which is we need to sum up the time of the T-Trading due to the FEE!
+So that, in the Rolling Stop Profit part, we can not use the constant Profit Rate 30%.
+Actually, we need to calculate profit + total Fee which in T-Trading happened, to get the new Stop Point.
+  Once we finished first round about T-Trading testing, I will start a new round. In this period, I will calculate when the profitrate reached
+30%, and to find our the relationship between 30% profit and Fee.
+
+中文：
+    在过去4天的测试中，策略代码中的反复开单BUG，使我发现现有的策略中有一个严重的漏洞：当行情处于持续亏损阶段，即做T策略进行多次开平仓后，且尚未盈利前，
+我们会产生未知数量的手续费。
+    因此，我们在动态滚仓止盈部分，不能将30%作为固定的止盈目标，我们需要计算心理盈利位之外，还需要加上在次轮操作期间产生的手续费用。
+    但因为当前我们在做T时，已经将手续费部分加入，所以在当下做T代码初步测试完毕后，下一轮测试将进行手续费计算，并且在达到30%盈利点位时计算利润与手续费关系。
+    
+
+
+# Update!!!
+2019-11-10
+  Today Dulior edited the code for T-Trading, right now the problem, Repeat trading, has been solved. There has a doubt that when the 
+market price has a wild fluctuation, what will happen in the strategy?
+  We can guess that, in the T-Trading strategy 1st vision, we set P as the real time market price, C as the successed close trade price,
+X as the price after calculate.
+  For example, when the profit rate reached < -10% target. The new Close Order will be putted in price C; pretend that the Close Order dealed,
+follow the strategy, the new Open Order will be placed in X = C*(1+r/m). Once the P reached price same as X, the Open Order will be dealed.
+  So in this situation, the bot can open a new Close Order, and set up a new Open Order. This loop will appear when the profit rate < =10%
+forever.
+  In this moment we will get the good result as our expectation.
+  
+BUT! If the market has a wild fluctuation, will the strategy finish the job well? 
+In this case, we need a new test for this doubt.
+
+
+中文：
+  今天Dulior修改了做T策略的代码，目前测试情况表明，重复开单的BUG已经修复。但是目前有一个新的可能出现的问题，当市场出现剧烈波动时，策略能否迅速做出反应？
+假设在当前版本代码下，P = 实时行价，C = 平仓成交价， X = C*(1+r/m)。 当前行情继续上涨，但如果出现黑天鹅事件（极端行情），实时价格大幅度上涨时，
+策略能否良好的进行，我们则需要进一步测试。
+  举例： P = 9000USD时，实时收益率小于-10%成立，在C = 9050平仓10张，成交后在X= 9063.6挂单，但挂单后P已经大于X很多，交易所是否能够按照交叉成交的方式继续成交，
+抑或是不成交，导致机器人无法继续循环操作，我们需要实盘测试！！！
+
+
+
+
+
