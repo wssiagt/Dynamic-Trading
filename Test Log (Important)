@@ -81,9 +81,23 @@ In this case, we need a new test for this doubt.
 假设在当前版本代码下，P = 实时行价，C = 平仓成交价， X = C*(1+r/m)。 当前行情继续上涨，但如果出现黑天鹅事件（极端行情），实时价格大幅度上涨时，
 策略能否良好的进行，我们则需要进一步测试。
   举例： P = 9000USD时，实时收益率小于-10%成立，在C = 9050平仓10张，成交后在X= 9063.6挂单，但挂单后P已经大于X很多，交易所是否能够按照交叉成交的方式继续成交，
-抑或是不成交，导致机器人无法继续循环操作，我们需要实盘测试！！！
+抑或是不成交，导致机器人无法继续循环操作，我们需要进一步实盘测试！！！
 
+# Update!!!
+2019-11-11
+	In BTC trading, there always has a wild fuctuation like today, in 1 minute decreased/increased more than 1%, the strategy could not
+deal successeful. So in this moment, the bot will not continue to loop the new order.
+	In this case, we can use manual control to make up the strategy, so that, we need to add altinative plan.
+	Rightnow, I have a preliminary plan: we can set a altinative judgment inside 'if profitrate < -10%', which is 'if the previous operation
+did not deal, and market price already over/less than the previous order, put a new Close order, and loop left 'while' judgment.'
 
-
-
+中文：
+    在BTC交易中，经常出现剧烈价格波动，例如：1分钟内，价格上涨/下跌超过1%，在这个情况下，策略出现无法成交的情况，原因是，在下单之后，价格已远远超过/低于
+挂单价格，导致后续循环无法进行。
+    在此基础上，我有一个初步的替代方案：在'if profitrate < -10%' 函数内，添加附加条件判断，如果previous order没有成交的情况下，市场价格已进一步下跌/上涨，
+则替代策略按当前行情执行Close，按照计算公式完成全部循环。
+    这一替代方案可能出现代码问题，即，iniamount与new_amount判断不准确（主要原因，暂不知是否需要撤销前单），关于这一点需要进一步测试！！！
+    今日剧烈波动后，当前策略已经进行到Log'开仓已挂单'，前单处于较低位置平仓，行情暂无法达到公式计算点位，所以手动撤销挂单，并且手动开多之后，strategy成功
+读取到最新持仓，完成了loop，进行了新操作。
+    假设，因为价格剧烈波动，bot无法完成平仓操作，此时也无法走出while iniamount != new_amount，关于这一点，需要进一步测试！！！
 
