@@ -90,6 +90,9 @@ deal successeful. So in this moment, the bot will not continue to loop the new o
 	In this case, we can use manual control to make up the strategy, so that, we need to add altinative plan.
 	Rightnow, I have a preliminary plan: we can set a altinative judgment inside 'if profitrate < -10%', which is 'if the previous operation
 did not deal, and market price already over/less than the previous order, put a new Close order, and loop left 'while' judgment.'
+	# New
+	While the previous Open Order did not be dealling, but the profit rate increasing. In this situation, we need to cancle the previous
+one, and let the bot re-start the main loop.
 
 中文：
     在BTC交易中，经常出现剧烈价格波动，例如：1分钟内，价格上涨/下跌超过1%，在这个情况下，策略出现无法成交的情况，原因是，在下单之后，价格已远远超过/低于
@@ -100,4 +103,5 @@ did not deal, and market price already over/less than the previous order, put a 
     今日剧烈波动后，当前策略已经进行到Log'开仓已挂单'，前单处于较低位置平仓，行情暂无法达到公式计算点位，所以手动撤销挂单，并且手动开多之后，strategy成功
 读取到最新持仓，完成了loop，进行了新操作。
     假设，因为价格剧烈波动，bot无法完成平仓操作，此时也无法走出while iniamount != new_amount，关于这一点，需要进一步测试！！！
-
+    # New
+    当前一次策略运行后，挂单尚未成交，但收益率已高于-10%，此时需要撤销挂单，重新循环main.
