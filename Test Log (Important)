@@ -108,3 +108,13 @@ one, and let the bot re-start the main loop.
     当前一次策略运行后，挂单尚未成交，但收益率已高于-10%，此时需要撤销挂单，重新循环main.
     # New!
     人工做单之后，如前挂单成交，则策略需要重新计算iniamount
+
+
+# Update!!!
+2019-11-14
+
+Timeout of the connection!
+
+机器人出现断开连接，需要重启！
+
+
