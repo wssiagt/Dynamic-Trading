@@ -117,4 +117,19 @@ Timeout of the connection!
 
 机器人出现断开连接，需要重启！
 
+	# Update!!!  2019-11-19
+    There are many bugs in the strategy! Not in the code, it's in the strategy!!!
+    First, the strategy need to consider the market price changing too fast, the bot can't finish the operation on time, so the strategy
+need to have a altinative plan as I said in the before.
+    Second, ADD NEW strategy, while the older order did not successed, but the profit rate resume to 0%, need to place new buy or close to
+get the same iniamount.
+    Third, the code need to change in the judgment part, the amount of the position is not clearly, so we need to use exchange.GetOrder
+to do a better judgment for the bot.
 
+    中文
+    策略有许多BUG，注意！不是代码，是策略需要改进！！！
+    首先，我们需要考虑当黑天鹅事件出现（价格变动速度大于机器人处理速度），此时我们需要判断是否跳过前一订单重新平/开仓！
+    第二，策略需要添加一条新指令：当最后一次平仓成功，但挂单未成交，此时市场价格已经上涨/下跌，使profit rate上升到0%，此时需要补齐为成交数量仓位。
+    第三，代码需要修改判断条件，Position数量判断不准确，出现成交数量有误，此条需要进一步检测是否错误率过高！
+
+	
