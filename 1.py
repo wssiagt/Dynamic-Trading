@@ -116,12 +116,12 @@ def main():
                 time.sleep(0.3)											# 不相等，执行休眠
             Log('挂单已成交，卖出价：'+ str(iniask), '买入价：'+ str(buyprice), '成交量：'+ str(tradeamount), '当前持仓量: '+ str(new_amount1))	# 输出'成功'
         elif profitrate >= 0.3 and profitrate < 0.6:
-            diff_condition(iniamount * 0.15, iniamount)
+            diff_condition(round(iniamount * 0.15), iniamount, profitrate)
         elif profitrate >= 0.6 and profitrate < 0.9:
-            diff_condition(iniamount * 0.15, iniamount)
+            diff_condition(round(iniamount * 0.15), iniamount, profitrate)
         elif profitrate >= 0.9 and profitrate < 1.2:
-            diff_condition(iniamount * 0.2, iniamount)
+            diff_condition(round(iniamount * 0.2), iniamount, profitrate)
         elif profitrate >= 1.2 and profitrate < 1.5:
-            diff_condition(iniamount * 0.2, iniamount)
+            diff_condition(round(iniamount * 0.2), iniamount, profitrate)
         else:
-            diff_condition(iniamount * 0.3, iniamount)
+            diff_condition(round(iniamount * 0.3), iniamount, profitrate)
