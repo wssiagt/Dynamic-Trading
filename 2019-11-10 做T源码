@@ -23,7 +23,7 @@ def depth(iniamount):
     inibid = inidepth.Bids[0].Price		# 买二价
     buyprice = round(iniask * (1-0.03 / 20), 2)
     sellprice = round(inibid * (1+0.03 / 20), 2)
-    tradeamount = round(iniamount * 0.015)
+    tradeamount = round(iniamount * 0.1)
     return iniask, inibid, buyprice, sellprice, tradeamount
 
 def buytrade(buyprice, tradeamount):
@@ -43,7 +43,7 @@ def closesell(inibid, tradeamount):
 	exchange.SetContractType(contract)
 	exchange.SetMarginLevel(20)
 	exchange.SetDirection("closesell")
-	exchange.Sell(inibid, tradeamount)
+	exchange.Buy(inibid, tradeamount)
 
 def selltrade(sellprice, tradeamount):
 	exchange.SetContractType(contract)
@@ -66,18 +66,18 @@ def main():
             Log('亏损率大于5%', '初始仓位：'+ str(iniamount), '开始交易')
             iniask, inibid, buyprice, sellprice, tradeamount = depth(iniamount)
             closesell(inibid, tradeamount)
-            time.sleep(1)
+            time.sleep(0.5)
             new_amount, new_amount1 = update_position()
             while int(new_amount) == int(iniamount):			# new_amount与iniamount是否相等
                 new_amount, new_amount1 = update_position()
-                time.sleep(1)											# 相等，执行休眠
+                time.sleep(0.3)											# 相等，执行休眠
             Log('平仓已成交')
             selltrade(sellprice,tradeamount)														# 否则，不相等（平仓成交）：
             Log('开仓已挂单')
             new_amount, new_amount1 = update_position()
             while int(new_amount1) != int(iniamount):		# new_amount1与iniamount是否相等
                 new_amount, new_amount1 = update_position()
-                time.sleep(1)											# 不相等，执行休眠
+                time.sleep(0.3)											# 不相等，执行休眠
             Log('挂单已成交，卖出价：'+ str(iniask), '买入价：'+ str(buyprice), '成交量：'+ str(tradeamount), '当前持仓量：@'+ str(new_amount1))	# 输出'成功'
         else:															# 当profitrate > -10%
-            time.sleep(1)
+            time.sleep(0.2)
