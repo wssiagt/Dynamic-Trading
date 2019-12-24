@@ -13,10 +13,10 @@ def volum():
 def initial():
     exchange.SetContractType("quarter")
     exchange.SetMarginLevel(20)
-	iniposition = exchange.GetPosition()
-	iniprice = iniposition[1].Price
-	profitrate = iniposition[1].Info.profit_rate
-	return profitrate
+    iniposition = exchange.GetPosition()
+    iniprice = iniposition[1].Price
+    profitrate = iniposition[1].Info.profit_rate
+    return profitrate
 
 def depth(iniamount):
     exchange.SetContractType(contract)
@@ -61,6 +61,7 @@ def update_position():
 
 def get_orders(buyprice,profitrate):
     price = 0
+    exchange.SetContractType(contract)
     current_id = '0'
     orders = exchange.GetOrders();
     for x in orders:
@@ -78,7 +79,7 @@ def get_orders(buyprice,profitrate):
         return 0
     return 1
 
-def diff_condition(amount):
+def diff_condition(amount, iniamount, profitrate):
     iniask, inibid, buyprice, sellprice, tradeamount = depth(iniamount)
     closesell(inibid, tradeamount)
     temp_var = get_orders(buyprice,profitrate)
@@ -86,7 +87,7 @@ def diff_condition(amount):
         if temp_var == 0:
             iniask, inibid, buyprice, sellprice, tradeamount = depth(iniamount)
             closesell(inibid, tradeamount)
-        else
+        else:
             time.sleep(0.5)
     selltrade(sellprice,amount)
 
@@ -104,7 +105,7 @@ def main():
                 if temp_var == 0:
                     iniask, inibid, buyprice, sellprice, tradeamount = depth(iniamount)
                     closesell(inibid, tradeamount)
-                else
+                else:
                     time.sleep(0.5)
             Log('平仓已成交')
             selltrade(sellprice,tradeamount)														# 否则，不相等（平仓成交）：
@@ -113,14 +114,14 @@ def main():
             while int(new_amount1) != int(iniamount):		# new_amount1与iniamount是否相等
                 new_amount, new_amount1 = update_position()
                 time.sleep(0.3)											# 不相等，执行休眠
-            Log('挂单已成交，卖出价：'+ str(iniask), '买入价：'+ str(buyprice), '成交量：'+ str(tradeamount), '当前持仓量：@'+ str(new_amount1))	# 输出'成功'
-        else if profitrate >= 0.3 and profitrate < 0.6:
-            diff_condition(iniamount * 0.15)
-        else if profitrate >= 0.6 and profitrate < 0.9:
-            diff_condition(iniamount * 0.15)
-        else if profitrate >= 0.9 and profitrate < 1.2:
-            diff_condition(iniamount * 0.2)
-        else if profitrate >= 1.2 and profitrate < 1.5:
-            diff_condition(iniamount * 0.2)
-        else
-            diff_condition(iniamount * 0.3)
+            Log('挂单已成交，卖出价：'+ str(iniask), '买入价：'+ str(buyprice), '成交量：'+ str(tradeamount), '当前持仓量: '+ str(new_amount1))	# 输出'成功'
+        elif profitrate >= 0.3 and profitrate < 0.6:
+            diff_condition(iniamount * 0.15, iniamount)
+        elif profitrate >= 0.6 and profitrate < 0.9:
+            diff_condition(iniamount * 0.15, iniamount)
+        elif profitrate >= 0.9 and profitrate < 1.2:
+            diff_condition(iniamount * 0.2, iniamount)
+        elif profitrate >= 1.2 and profitrate < 1.5:
+            diff_condition(iniamount * 0.2, iniamount)
+        else:
+            diff_condition(iniamount * 0.3, iniamount)
