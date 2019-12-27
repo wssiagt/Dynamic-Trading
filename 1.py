@@ -90,7 +90,9 @@ def diff_condition(amount, iniamount, profitrate):
             closesell(inibid, tradeamount)
         else:
             time.sleep(0.5)
-    selltrade(sellprice,amount)
+    reorderposition = exchange.GetPosition()
+    reorderprice = reorderposition[1].Price
+    selltrade(round(reorderprice),amount)
 
 def main():
     Log('策略运行成功，', '开始监控')
@@ -114,7 +116,7 @@ def main():
             new_amount, new_amount1 = update_position()
             while int(new_amount1) != int(iniamount):		# new_amount1与iniamount是否相等
                 new_amount, new_amount1 = update_position()
-                time.sleep(0.3)											# 不相等，执行休眠
+                time.sleep(0.3)						# 不相等，执行休眠
             Log('挂单已成交，卖出价：'+ str(iniask), '买入价：'+ str(buyprice), '成交量：'+ str(tradeamount), '当前持仓量: '+ str(new_amount1))	# 输出'成功'
         elif profitrate >= 0.3 and profitrate < 0.6:
             if case[0] == 0:
@@ -132,10 +134,9 @@ def main():
             if case[3] == 0:
                 diff_condition(round(iniamount * 0.2), iniamount, profitrate)
                 case[3] = 1
-        else if profitrate >= 1.5:
+        elif profitrate >= 1.5:
             if case[4] == 0:
                 diff_condition(round(iniamount * 0.3), iniamount, profitrate)
                 case[4] = 1
         else:
             time.sleep(0.2)
-
