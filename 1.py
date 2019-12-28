@@ -87,7 +87,7 @@ def diff_condition(amount, iniamount, profitrate):
     while temp_var != 1:
         if temp_var == 0:
             iniask, inibid, buyprice, sellprice, tradeamount = depth(iniamount)
-            closesell(inibid, tradeamount)
+            closesell(inibid, amount)
         else:
             time.sleep(0.5)
     reorderposition = exchange.GetPosition()
