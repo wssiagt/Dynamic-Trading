@@ -35,3 +35,22 @@
 	    
 	    exchange.GetPosition(), exchange.GetDepth()语句需要使用websocket协议，否则执行速度过慢！！！
 	    
+
+12-29
+v2.0
+
+1. 运行volum，initial，获取当前amount，并将volum部分获取的amount作为不变值，initial设置合约、杠杆、获取profitrate等基础设置.
+
+2. 当profitrate<-0.05时，执行depth获取iniask，inibid，并通过计算得出buyprice、sellprice和tradeamount.
+
+3. 执行closesell，输入buyprice，tradeamount作为参数.
+
+4. closesell执行完毕后，循环运行getorders获取closesell的订单，且保留该订单ID，并同时循环获取当前initial.profitrate，
+	当：getorders有返回值符合Offset=0，且Price=closesell步骤中buyprice，且同时profitrate<-0.05，三个条件都成立时继续循环；
+	当：getorders有返回值符合Offset=0，且Price=buyprice的订单，但当前profitrate-（-0.05）<-0.02时，使用Cancel（ID）取消订单，
+返回执行第二步；
+	当：getorders无返回值符合offset=0，且Price=buyprice的订单，且profitrate>-0.05时，使用Cancel（ID）取消订单，执行depth，获取iniask，
+执行selltrade(iniask, tradeamount)；
+	当：getorders无返回值符合Offset=0，且Price=buyprice的订单，且profitrate<-0.05时，进入下一步。
+
+注：描述中“返回执行第二步”，也可以通过执行: depth→closesell(buyprice, tradeaomount)来实现。
