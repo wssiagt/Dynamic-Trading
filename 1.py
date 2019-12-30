@@ -138,15 +138,6 @@ def main():
             selltrade(sellprice,tradeamount)														# 否则，不相等（平仓成交）：
             Log('开仓已挂单')
             new_amount, new_amount1, new_profitrate = update_position()
-            while int(new_amount1) != int(iniamount):		# new_amount1与iniamount是否相等
-                new_amount, new_amount1,new_profitrate = update_position()
-                #判断profitrate 是否大于 -0.05
-                if new_profitrate > -0.05:
-                    orders = exchange.GetOrders()
-                    exchange.CancelOrder(orders[0].Id)
-                    iniask, inibid, buyprice, sellprice, tradeamount = depth(iniamount)
-                    selltrade(iniask,tradeamount)
-                time.sleep(0.3)						# 不相等，执行休眠
             Log('挂单已成交，卖出价：'+ str(iniask), '买入价：'+ str(buyprice), '成交量：'+ str(tradeamount), '当前持仓量: '+ str(new_amount1))	# 输出'成功'
         elif profitrate >= 0.3 and profitrate < 0.6:
             if case[0] == 0:
