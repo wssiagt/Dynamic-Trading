@@ -62,7 +62,7 @@ def update_position():
     new_profitrate = new_position[0].Info.profit_rate
     return new_amount, new_amount1, new_profitrate
 
-def get_orders(sellprice, iniask, profitrate):
+def get_orders(buyprice, inibid, sellprice, iniask, profitrate):
     price = 0
     exchange.SetContractType(contract)
     iniposition = exchange.GetPosition()
@@ -75,19 +75,19 @@ def get_orders(sellprice, iniask, profitrate):
     for x in orders:
         if x.Id:
             Log('orders is: ',x.Offset, x.Price,current_profitrate)
-            if x.Offset == 0 and x.Price == sellprice and current_profitrate < -0.05:
+            if x.Offset == 0 and x.Price == iniask and current_profitrate < -0.05:
                 return 1
-            elif x.Offset == 0 and x.Price == sellprice and current_profitrate + 0.05 < -0.02:
+            elif x.Offset == 0 and x.Price == iniask and current_profitrate + 0.05 < -0.02:
                 exchange.CancelOrder(x.Id)
                 return 2
-            elif x.Offset == 0 and x.Price == sellprice and current_profitrate > -0.05:
+            elif x.Offset == 0 and x.Price == iniask and current_profitrate > -0.05:
                 exchange.CancelOrder(x.Id)
                 return 2
         else:
             if x.Offset == 0 and x.Price == sellprice and current_profitrate < -0.05:
                 return 3
 
-def get_orders2(inibid,profitrate):
+def get_orders2(inibid, profitrate):
     price = 0
     exchange.SetContractType(contract)
     current_id = '0'
@@ -138,7 +138,7 @@ def main():
             iniask, inibid, buyprice, sellprice, tradeamount = depth(iniamount)
             closebuy(iniask, tradeamount)
             Log('平仓挂单成功，开始getorders')
-            temp_var = get_orders(sellprice, profitrate)
+            temp_var = get_orders(buyprice, inibid, sellprice, iniask, profitrate)
             Log('temp_var: ', temp_var)
             while temp_var != 3:
                 if temp_var == 2:
