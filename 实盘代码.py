@@ -79,10 +79,10 @@ def get_orders(buyprice, inibid, sellprice, iniask, profitrate):
             elif x.Offset == 1 and x.Price == iniask and current_profitrate + 0.01 < -0.02:
                 exchange.CancelOrder(x.Id)
                 return 2
-            elif x.Offset == 1 and x.Price == iniask and current_profitrate > -0.01:
-                exchange.CancelOrder(x.Id)
-                return 3
-    if current_profitrate < -0.01:
+    elif current_profitrate > -0.01:
+        exchange.CancelOrder(x.Id)
+        return 3
+    elif current_profitrate < -0.01:
         return 4
 
 def diff_condition(amount, iniamount, profitrate):
