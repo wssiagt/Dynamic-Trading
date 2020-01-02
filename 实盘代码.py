@@ -81,35 +81,9 @@ def get_orders(buyprice, inibid, sellprice, iniask, profitrate):
                 return 2
             elif x.Offset == 1 and x.Price == iniask and current_profitrate > -0.01:
                 exchange.CancelOrder(x.Id)
-                return 2
-        else:
-            if x.Offset == 1 and x.Price == sellprice and current_profitrate < -0.01:
                 return 3
-
-def get_orders2(inibid, profitrate):
-    price = 0
-    exchange.SetContractType(contract)
-    current_id = '0'
-    orders = exchange.GetOrders()
-    Log('orders getted once')
-    for x in orders:
-        if x.Price == sellprice:
-            iniposition = exchange.GetPosition()
-            if iniposition[0].Info.profit_rate - profitrate >= -0.02:
-                Log('Profitrate Falls')
-                return x.Id
-            else:
-                current_id = x.Id
-                Log(str(x.id),'Cancel')
-                break
-        else:
-            Log('平仓已成交')
-            continue
-    if current_id != '0':
-        exchange.CancelOrder(current_id)
-        Log('Order Canceled')
-        return 0
-    return 1
+    if current_profitrate < -0.01:
+        return 4
 
 def diff_condition(amount, iniamount, profitrate):
     iniask, inibid, buyprice, sellprice, tradeamount = depth(iniamount)
@@ -138,7 +112,7 @@ def main():
             closebuy(iniask, tradeamount)
             Log('平仓挂单成功，开始getorders')
             temp_var = get_orders(buyprice, inibid, sellprice, iniask, profitrate)
-            while temp_var != 3:
+            while temp_var != 4:
                 Log('temp_var: ', temp_var)
                 if temp_var == 2:
                     #执行第二步
@@ -150,6 +124,10 @@ def main():
                     #执行第四步
                     temp_var = get_orders(buyprice, inibid, sellprice, iniask, profitrate)
                     time.sleep(0.2)
+                elif temp_var == 3:
+                    iniask, inibid, buyprice, sellprice, tradeamount = depth(iniamount)
+                    temp_var = get_orders(buyprice, inibid, sellprice, iniask, profitrate)
+                    buytrade(inibid, tradeamount)
             Log('平仓已成交')
             buytrade(buyprice,tradeamount)														# 否则，不相等（平仓成交）：
             Log('开仓已挂单')
