@@ -67,18 +67,23 @@ def get_orders(sellprice,profitrate):
     exchange.SetContractType(contract)
     current_id = '0'
     orders = exchange.GetOrders()
+    Log('Geting Orders')
     for x in orders:
         if not x.Id:
-            if x.Offset == 1 and x.Price == sellprice and current_profitrate < -0.05:
+            if x.Price == sellprice and current_profitrate < -0.05:
+                Log('getorder1, return 1')
                 return 1
-            elif x.Offset == 1 and x.Price == sellprice and current_profitrate + 0.05 < -0.02:
+            elif x.Price == sellprice and current_profitrate + 0.05 < -0.02:
                 exchange.CancelOrder(x.Id)
+                Log('getorder1, return 2, and order canceled')
                 return 2
-            elif x.Offset == 1 and x.Price == sellprice and current_profitrate > -0.05:
+            elif x.Price == sellprice and current_profitrate > -0.05:
                 exchange.CancelOrder(x.Id)
+                Log('getorder1, return 2, and order canceled in 2nd condition')
                 return 2
         else:
-            if x.Offset == 1 and x.Price == sellprice and current_profitrate < -0.05:
+            if x.Price == sellprice and current_profitrate < -0.05:
+                Log('getorder1, return 3')
                 return 3
 
 def get_orders2(sellprice,profitrate):
@@ -88,7 +93,7 @@ def get_orders2(sellprice,profitrate):
     orders = exchange.GetOrders()
     Log('orders getted once')
     for x in orders:
-        if x.Offset == 1 and x.Price == sellprice:
+        if x.Price == sellprice:
             iniposition = exchange.GetPosition()
             if iniposition[1].Info.profit_rate - profitrate >= -0.02:
                 Log('Profitrate Falls')
@@ -133,7 +138,6 @@ def main():
             closebuy(iniask, tradeamount)
             Log('平仓挂单成功，开始getorders')
             temp_var = get_orders(sellprice,profitrate)
-            Log('Geting Orders')
             while temp_var != 3:
                 if temp_var == 2:
                     #执行第二步
