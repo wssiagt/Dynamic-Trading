@@ -80,7 +80,6 @@ def get_orders(buyprice, inibid, sellprice, iniask, profitrate):
                 exchange.CancelOrder(x.Id)
                 return 2
     elif current_profitrate > -0.01:
-        exchange.CancelOrder(x.Id)
         return 3
     elif current_profitrate < -0.01:
         return 4
@@ -125,6 +124,9 @@ def main():
                     temp_var = get_orders(buyprice, inibid, sellprice, iniask, profitrate)
                     time.sleep(0.2)
                 elif temp_var == 3:
+		    newo = exchange.GetOrders()
+	            new_Id = newo[0].Id
+                    exchange.CancelOrder(new_Id)
                     iniask, inibid, buyprice, sellprice, tradeamount = depth(iniamount)
                     temp_var = get_orders(buyprice, inibid, sellprice, iniask, profitrate)
                     buytrade(inibid, tradeamount)
