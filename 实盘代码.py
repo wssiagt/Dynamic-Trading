@@ -66,20 +66,16 @@ def get_orders(buyprice, inibid, sellprice, iniask, profitrate):
     exchange.SetContractType(contract)
     iniposition = exchange.GetPosition()
     current_profitrate = iniposition[0].Info.profit_rate
-    Log('opration price, if:', iniask)
-    Log('rate: ',current_profitrate)
-    Log('position: ', iniposition, 'rate: ',current_profitrate)
     current_id = '0'
     orders = exchange.GetOrders()
     for x in orders:
         if x.Id:
-            Log('orders is: ',x.Offset, x.Price,current_profitrate)
             if x.Offset == 1 and x.Price == iniask and current_profitrate < -0.01:
                 return 1
             elif x.Offset == 1 and x.Price == iniask and current_profitrate + 0.01 < -0.02:
                 exchange.CancelOrder(x.Id)
                 return 2
-    elif current_profitrate > -0.01:
+    if current_profitrate > -0.01:
         return 3
     elif current_profitrate < -0.01:
         return 4
@@ -112,7 +108,7 @@ def main():
             Log('平仓挂单成功，开始getorders')
             temp_var = get_orders(buyprice, inibid, sellprice, iniask, profitrate)
             while temp_var != 4:
-                Log('temp_var: ', temp_var)
+                Log('return:', temp_var)
                 if temp_var == 2:
                     #执行第二步
                     iniask, inibid, buyprice, sellprice, tradeamount = depth(iniamount)
@@ -124,12 +120,14 @@ def main():
                     temp_var = get_orders(buyprice, inibid, sellprice, iniask, profitrate)
                     time.sleep(0.2)
                 elif temp_var == 3:
-		    newo = exchange.GetOrders()
-	            new_Id = newo[0].Id
+                    newo = exchange.GetOrders()
+                    new_Id = newo[0].Id
                     exchange.CancelOrder(new_Id)
                     iniask, inibid, buyprice, sellprice, tradeamount = depth(iniamount)
                     temp_var = get_orders(buyprice, inibid, sellprice, iniask, profitrate)
                     buytrade(inibid, tradeamount)
+                    Log('收益率相同')
+                    time.sleep(0.2)
             Log('平仓已成交')
             buytrade(buyprice,tradeamount)														# 否则，不相等（平仓成交）：
             Log('开仓已挂单')
