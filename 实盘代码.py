@@ -1,5 +1,5 @@
 import time
-k = 0.05
+k = -0.01
 new_amount = 0
 new_amount1 = 0
 new_profit = 0
@@ -27,7 +27,6 @@ def depth(iniamount):
     buyprice = round(iniask * (1-0.03 / 20), 2)
     sellprice = round(inibid * (1+0.03 / 20), 2)
     tradeamount = round(iniamount * 0.1)
-    Log('sellprice is :', sellprice)
     return iniask, inibid, buyprice, sellprice, tradeamount
 
 def buytrade(buyprice, tradeamount):
@@ -67,7 +66,7 @@ def get_orders(buyprice, inibid, sellprice, iniask, profitrate):
     exchange.SetContractType(contract)
     iniposition = exchange.GetPosition()
     current_profitrate = iniposition[0].Info.profit_rate
-    Log('price:', iniask)
+    Log('opration price, if:', iniask)
     Log('rate: ',current_profitrate)
     Log('position: ', iniposition, 'rate: ',current_profitrate)
     current_id = '0'
@@ -75,16 +74,16 @@ def get_orders(buyprice, inibid, sellprice, iniask, profitrate):
     for x in orders:
         if x.Id:
             Log('orders is: ',x.Offset, x.Price,current_profitrate)
-            if x.Offset == 0 and x.Price == iniask and current_profitrate < -0.05:
+            if x.Offset == 1 and x.Price == iniask and current_profitrate < -0.01:
                 return 1
-            elif x.Offset == 0 and x.Price == iniask and current_profitrate + 0.05 < -0.02:
+            elif x.Offset == 1 and x.Price == iniask and current_profitrate + 0.01 < -0.02:
                 exchange.CancelOrder(x.Id)
                 return 2
-            elif x.Offset == 0 and x.Price == iniask and current_profitrate > -0.05:
+            elif x.Offset == 1 and x.Price == iniask and current_profitrate > -0.01:
                 exchange.CancelOrder(x.Id)
                 return 2
         else:
-            if x.Offset == 0 and x.Price == sellprice and current_profitrate < -0.05:
+            if x.Offset == 1 and x.Price == sellprice and current_profitrate < -0.01:
                 return 3
 
 def get_orders2(inibid, profitrate):
@@ -139,17 +138,17 @@ def main():
             closebuy(iniask, tradeamount)
             Log('平仓挂单成功，开始getorders')
             temp_var = get_orders(buyprice, inibid, sellprice, iniask, profitrate)
-            Log('temp_var: ', temp_var)
             while temp_var != 3:
+                Log('temp_var: ', temp_var)
                 if temp_var == 2:
                     #执行第二步
                     iniask, inibid, buyprice, sellprice, tradeamount = depth(iniamount)
                     closebuy(iniask, tradeamount)
-                    temp_var = get_orders(sellprice,profitrate)
+                    temp_var = get_orders(buyprice, inibid, sellprice, iniask, profitrate)
                     time.sleep(0.2)
                 elif temp_var == 1:
                     #执行第四步
-                    temp_var = get_orders(sellprice,profitrate)
+                    temp_var = get_orders(buyprice, inibid, sellprice, iniask, profitrate)
                     time.sleep(0.2)
             Log('平仓已成交')
             buytrade(buyprice,tradeamount)														# 否则，不相等（平仓成交）：
