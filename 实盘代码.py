@@ -1,5 +1,5 @@
 import time
-k = -0.05
+k = 0.05
 new_amount = 0
 new_amount1 = 0
 new_profit = 0
@@ -27,6 +27,7 @@ def depth(iniamount):
     buyprice = round(iniask * (1-0.03 / 20), 2)
     sellprice = round(inibid * (1+0.03 / 20), 2)
     tradeamount = round(iniamount * 0.1)
+    Log('sellprice is :', sellprice)
     return iniask, inibid, buyprice, sellprice, tradeamount
 
 def buytrade(buyprice, tradeamount):
@@ -56,37 +57,37 @@ def selltrade(sellprice, tradeamount):
 
 def update_position():
     new_position = exchange.GetPosition()
-    new_amount = new_position[1].Amount
-    new_amount1 = new_position[1].Amount
-    new_profitrate = new_position[1].Info.profit_rate
+    new_amount = new_position[0].Amount
+    new_amount1 = new_position[0].Amount
+    new_profitrate = new_position[0].Info.profit_rate
     return new_amount, new_amount1, new_profitrate
 
-def get_orders(sellprice,profitrate):
+def get_orders(sellprice, iniask, profitrate):
     price = 0
-    current_profitrate = initial()
     exchange.SetContractType(contract)
+    iniposition = exchange.GetPosition()
+    current_profitrate = iniposition[0].Info.profit_rate
+    Log('price:', iniask)
+    Log('rate: ',current_profitrate)
+    Log('position: ', iniposition, 'rate: ',current_profitrate)
     current_id = '0'
     orders = exchange.GetOrders()
-    Log('Geting Orders')
     for x in orders:
-        if not x.Id:
-            if x.Price == sellprice and current_profitrate < -0.05:
-                Log('getorder1, return 1')
+        if x.Id:
+            Log('orders is: ',x.Offset, x.Price,current_profitrate)
+            if x.Offset == 0 and x.Price == sellprice and current_profitrate < -0.05:
                 return 1
-            elif x.Price == sellprice and current_profitrate + 0.05 < -0.02:
+            elif x.Offset == 0 and x.Price == sellprice and current_profitrate + 0.05 < -0.02:
                 exchange.CancelOrder(x.Id)
-                Log('getorder1, return 2, and order canceled')
                 return 2
-            elif x.Price == sellprice and current_profitrate > -0.05:
+            elif x.Offset == 0 and x.Price == sellprice and current_profitrate > -0.05:
                 exchange.CancelOrder(x.Id)
-                Log('getorder1, return 2, and order canceled in 2nd condition')
                 return 2
         else:
-            if x.Price == sellprice and current_profitrate < -0.05:
-                Log('getorder1, return 3')
+            if x.Offset == 0 and x.Price == sellprice and current_profitrate < -0.05:
                 return 3
 
-def get_orders2(sellprice,profitrate):
+def get_orders2(inibid,profitrate):
     price = 0
     exchange.SetContractType(contract)
     current_id = '0'
@@ -95,7 +96,7 @@ def get_orders2(sellprice,profitrate):
     for x in orders:
         if x.Price == sellprice:
             iniposition = exchange.GetPosition()
-            if iniposition[1].Info.profit_rate - profitrate >= -0.02:
+            if iniposition[0].Info.profit_rate - profitrate >= -0.02:
                 Log('Profitrate Falls')
                 return x.Id
             else:
@@ -137,7 +138,8 @@ def main():
             iniask, inibid, buyprice, sellprice, tradeamount = depth(iniamount)
             closebuy(iniask, tradeamount)
             Log('平仓挂单成功，开始getorders')
-            temp_var = get_orders(sellprice,profitrate)
+            temp_var = get_orders(sellprice, profitrate)
+            Log('temp_var: ', temp_var)
             while temp_var != 3:
                 if temp_var == 2:
                     #执行第二步
