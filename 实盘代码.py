@@ -115,9 +115,8 @@ def main():
                     #执行第二步
                     iniask, inibid, buyprice, sellprice, tradeamount = depth(iniamount)
                     closebuy(iniask, tradeamount)
-                    while volum(iniamount) == update_position(new_amount):
-                        temp_var = get_orders(buyprice, inibid, sellprice, iniask, profitrate)
-                        time.sleep(0.1)
+                    temp_var = get_orders(buyprice, inibid, sellprice, iniask, profitrate)
+                    time.sleep(0.1)
                 elif temp_var == 1:
                     temp_var = get_orders(buyprice, inibid, sellprice, iniask, profitrate)
                     time.sleep(0.1)
