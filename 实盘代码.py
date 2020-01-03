@@ -72,17 +72,13 @@ def get_orders(buyprice, inibid, sellprice, iniask, profitrate):
         if x.Id:
             Log(current_profitrate, current_id)
             if x.Offset == 1 and x.Price == iniask and current_profitrate < -0.05:
-                while volum(iniamount) == update_position(new_amount):
                     return 1
             elif x.Offset == 1 and x.Price == iniask and current_profitrate - k < -0.02:
                 exchange.CancelOrder(x.Id)
-                while volum(iniamount) != update_position(new_amount):
                     return 2
     if current_profitrate > -0.05:
-        while volum(iniamount) != update_position(new_amount):
             return 3
     elif current_profitrate < -0.05:
-        while volum(iniamount) != update_position(new_amount):
             return 4
 
 def diff_condition(amount, iniamount, profitrate):
