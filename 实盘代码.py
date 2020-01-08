@@ -68,6 +68,7 @@ def get_orders(buyprice, inibid, sellprice, iniask, profitrate):
     iniposition = exchange.GetPosition()
     current_profitrate = iniposition[0].Info.profit_rate
     current_id = '0'
+    exchange.SetContractType(contract)
     orders = exchange.GetOrders()
     for x in orders:
         if x.Id:
@@ -77,15 +78,30 @@ def get_orders(buyprice, inibid, sellprice, iniask, profitrate):
             elif x.Offset == 1 and x.Price == iniask and current_profitrate - k < -0.02:
                 exchange.CancelOrder(x.Id)
                 return 2
-    if current_profitrate > -0.05:
+    if current_profitrate > -0.05 and current_profitrate < -0.025:
         return 3
     elif current_profitrate < -0.05:
         return 4
+    
+def get_orders2(iniask, profitrate):
+    price = 0
+    exchange.SetContractType(contract)
+    current_id = '0'
+    orders = exchange.GetOrders()
+    for x in orders:
+        if x.Offset == 1 and x.Price == iniask:
+            exchange.SetContractType(contract)
+            iniposition = exchange.GetPosition()
+            return x.Id
+        else:
+            return 0
+    else:
+        return 1
 
 def diff_condition(amount, iniamount, profitrate):
     iniask, inibid, buyprice, sellprice, tradeamount = depth(iniamount)
     closebuy(iniask, tradeamount)
-    temp_var = get_orders2(sellprice,profitrate)
+    temp_var = get_orders2(iniask, profitrate)
     while temp_var != 1:
         if temp_var == 0:
             iniask, inibid, buyprice, sellprice, tradeamount = depth(iniamount)
@@ -125,36 +141,40 @@ def main():
                 elif temp_var == 3:
                     get_return_3 = 1
                     Log('收益率相同')
+                    time.sleep(0.1)
             Log('平仓已成交')
             buytrade(buyprice,tradeamount)
             Log('开仓已挂单')
-            if get_return_3 == 1:
-                newo = exchange.GetOrders()
-                new_Id = newo[0].Id
-                time.sleep(0.2)
-                exchange.CancelOrder(new_Id)
-                iniask, inibid, buyprice, sellprice, tradeamount = depth(iniamount)
-                buytrade(inibid, tradeamount)
-                time.sleep(0.2)
-            new_amount, new_amount1, new_profitrate = update_position()
-            Log('挂单已成交，卖出价：'+ str(iniask), '买入价：'+ str(buyprice), '成交量：'+ str(tradeamount), '当前持仓量: '+ str(new_amount1))	# 输出'成功'
-        elif profitrate >= 0.3 and profitrate < 0.6:
+            time.sleep(0.1)
+            new_amount = update_position()
+            while int(new_amount) != int(iniamount): # 这里引用了上一版的判断是否成交条件，只使用了一次update_position（），所以只是用了newamount
+                if get_return_3 == 1:
+                    exchange.SetContractType(contract)
+                    newo = exchange.GetOrders()
+                    new_Id = newo[0].Id
+                    time.sleep(0.05)
+                    exchange.CancelOrder(new_Id)
+                    iniask, inibid, buyprice, sellprice, tradeamount = depth(iniamount)
+                    buytrade(inibid, tradeamount)
+                    time.sleep(0.2)
+            Log('挂单已成交，卖出价：'+ str(iniask), '买入价：'+ str(buyprice), '成交量：'+ str(tradeamount), '当前持仓量: '+ str(new_amount))	# 输出'成功'
+        elif profitrate >= 0.5 and profitrate < 0.8:
             if case[0] == 0:
                 diff_condition(round(iniamount * 0.15), iniamount, profitrate)
                 case[0] = 1
-        elif profitrate >= 0.6 and profitrate < 0.9:
+        elif profitrate >= 0.8 and profitrate < 1.1:
             if case[1] == 0:
                 diff_condition(round(iniamount * 0.15), iniamount, profitrate)
                 case[1] = 1
-        elif profitrate >= 0.9 and profitrate < 1.2:
+        elif profitrate >= 1.1 and profitrate < 1.5:
             if case[2] == 0:
                 diff_condition(round(iniamount * 0.2), iniamount, profitrate)
                 case[2] = 1
-        elif profitrate >= 1.2 and profitrate < 1.5:
+        elif profitrate >= 1.5 and profitrate < 1.8:
             if case[3] == 0:
                 diff_condition(round(iniamount * 0.2), iniamount, profitrate)
                 case[3] = 1
-        elif profitrate >= 1.5:
+        elif profitrate >= 1.8:
             if case[4] == 0:
                 diff_condition(round(iniamount * 0.3), iniamount, profitrate)
                 case[4] = 1
