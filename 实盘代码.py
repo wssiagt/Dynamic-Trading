@@ -114,13 +114,13 @@ def diff_condition(amount, iniamount, profitrate):
     while temp_var != 1:
         if temp_var == 0:
             iniask, inibid, buyprice, sellprice, tradeamount = depth(iniamount)
-            closebuy(iniask, amount)
+            closebuy(iniask, amount) # amount是哪里来的，这个变量好像导致diff_condition没有运行，按策略应该是与main当中tradamount相等
             Log('30%')
         else:
             time.sleep(0.5)
     reorderposition = exchange.GetPosition()
     reorderprice = reorderposition[0].Price
-    buytrade(round(reorderprice),amount)
+    buytrade(round(reorderprice),amount) # amount是哪里来的，这个变量好像导致diff_condition没有运行，按策略应该是与main当中tradamount相等
     Log('已挂补仓单')
 
 def main():
@@ -163,7 +163,7 @@ def main():
                     exchange.SetContractType(contract)
                     time.sleep(0.3)
                     newo = exchange.GetOrders()
-                    new_Id = newo[0].Id
+                    new_Id = newo[0].Id			# 此处是本次主要bug，获取不到值，原因未知，可能是因为等待时间不够，也可能是代码错误
                     exchange.CancelOrder(new_Id)
                     iniask, inibid, buyprice, sellprice, tradeamount = depth(iniamount)
                     time.sleep(0.1)
