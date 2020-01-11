@@ -59,6 +59,12 @@ def update_position():
     new_amount = new_position[0].Amount
     return new_amount
 
+def update_profitrate():
+    exchange.SetContractType(contract)
+    new_position1 = exchange.GetPosition()
+    new_profitrate = new_position1[0].Info.profit_rate
+    return new_profitrate
+
 def get_orders(buyprice, inibid, sellprice, iniask, profitrate):
     price = 0
     exchange.SetContractType(contract)
@@ -100,7 +106,7 @@ def get_orders2(iniask, profitrate):
             return 0
     else:
         return 1
-
+    
 def diff_condition(amount, iniamount, profitrate):
     iniask, inibid, buyprice, sellprice, tradeamount = depth(iniamount)
     closebuy(iniask, tradeamount)
@@ -137,7 +143,7 @@ def main():
                     iniask, inibid, buyprice, sellprice, tradeamount = depth(iniamount)
                     closebuy(iniask, tradeamount)
                     temp_var = get_orders(buyprice, inibid, sellprice, iniask, profitrate)
-                    time.sleep(0.15)
+                    time.sleep(0.1)
                 elif temp_var == 1:
                     temp_var = get_orders(buyprice, inibid, sellprice, iniask, profitrate)
                     time.sleep(0.15)
@@ -150,18 +156,23 @@ def main():
             Log('开仓已挂单')
             time.sleep(0.15)
             new_amount = update_position()
+            time.sleep(0.1)
             while int(new_amount) != int(iniamount):
-                if get_return_3 == 1:
+                new_profitrate = update_profitrate()
+                while new_profitrate > -0.045 and new_profitrate <0.015:
                     exchange.SetContractType(contract)
+                    time.sleep(0.3)
                     newo = exchange.GetOrders()
                     new_Id = newo[0].Id
-                    time.sleep(0.15)
                     exchange.CancelOrder(new_Id)
                     iniask, inibid, buyprice, sellprice, tradeamount = depth(iniamount)
+                    time.sleep(0.1)
                     buytrade(inibid, tradeamount)
-                    time.sleep(0.15)
+                    time.sleep(0.05)
+                    new_profitrate = update_profitrate()
+                    time.sleep(0.05)
                 new_amount = update_position()
-                time.sleep(0.2)
+                time.sleep(0.1)
             Log('挂单已成交，卖出价：'+ str(iniask), '买入价：'+ str(buyprice), '成交量：'+ str(tradeamount), '当前持仓量: '+ str(new_amount))	# 输出'成功'
         elif profitrate >= 0.5 and profitrate < 0.8:
             if case[0] == 0:
