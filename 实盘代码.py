@@ -158,13 +158,15 @@ def main():
             time.sleep(0.15)
             new_amount = update_position()
             time.sleep(0.1)
+            Log('exchange.GetOrders() is:', exchange.GetOrders())
             while int(new_amount) != int(iniamount):
                 new_profitrate = update_profitrate()
                 while new_profitrate > -0.045 and new_profitrate <0.015:
                     exchange.SetContractType(contract)
                     time.sleep(0.3)
                     newo = exchange.GetOrders()
-                    new_Id = newo[0].Id			# 此处是本次主要bug，获取不到值，原因未知，可能是因为等待时间不够，也可能是代码错误
+		    if newo:
+                    	new_Id = newo[0].Id			# 此处是本次主要bug，获取不到值，原因未知，可能是因为等待时间不够，也可能是代码错误
                     exchange.CancelOrder(new_Id)
                     iniask, inibid, buyprice, sellprice, tradeamount = depth(iniamount)
                     time.sleep(0.1)
