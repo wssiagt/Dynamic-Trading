@@ -115,12 +115,13 @@ def diff_condition(amount, iniamount, profitrate):
         if temp_var == 0:
             iniask, inibid, buyprice, sellprice, tradeamount = depth(iniamount)
             closebuy(iniask, amount) # amount是哪里来的，这个变量好像导致diff_condition没有运行，按策略应该是与main当中tradamount相等
-            Log('30%')
+            Log('30% when temp == 1, amout is: ', amount)
         else:
             time.sleep(0.5)
     reorderposition = exchange.GetPosition()
     reorderprice = reorderposition[0].Price
     buytrade(round(reorderprice),amount) # amount是哪里来的，这个变量好像导致diff_condition没有运行，按策略应该是与main当中tradamount相等
+    Log('Later amout is: ', amount)
     Log('已挂补仓单')
 
 def main():
